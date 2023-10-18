@@ -7,7 +7,7 @@ impl Plugboard {
         Plugboard { plugboard_map }
     }
 
-    pub fn pass_thru_plugboard(&self, c: char) -> Result<char, &'static str> {
+    pub fn pass_through(&self, c: char) -> Result<char, &'static str> {
         self.plugboard_map.iter()
             .find(|&&(a, b)| a == c || b == c)
             .map(|&(a, b)| if a == c { b } else { a })
