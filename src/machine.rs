@@ -22,19 +22,13 @@ impl EnigmaMachine {
 
         let rotors_after_forward_pass = self.rotors.iter()
             .try_fold(plugboard_pass, |state, rotor| rotor.pass_through_forward(state))
-            .map_err(|_| "Error in forward rotor pass")?;
+            .ok_or("Error in forward rotor pass")?;
 
         let mid_char = self.reflector.encrypt(rotors_after_forward_pass)?;
 
-        let final_char_result = self.rotors.iter().rev()
-            .try_fold(mid_char, |state, rotor| rotor.pass_through_reverse(state));
-
-        let final_char = match final_char_result {
-            Some(Ok(c)) => c,
-            Some(Err(e)) => return Err(e),
-            None => return Err("Failed processing with reverse rotor pass."),
-            _ => {}
-        };
+        let final_char = self.rotors.iter().rev()
+            .try_fold(mid_char, |state, rotor| rotor.pass_through_reverse(state))
+            .ok_or("Failed processing with reverse rotor pass")?;
 
         self.plugboard.pass_through(final_char)
     }
@@ -51,7 +45,7 @@ fn main() {
 
     let encrypted = enigma.encrypt('A');
     match encrypted {
-        Some(e) => println!("Encrypted Character: {}", e),
-        None => println!("Error encrypting character."),
+        Ok(e) => println!("Encrypted Character: {}", e),
+        Err(e) => println!("Error encrypting character: {}", e),
     }
 }
