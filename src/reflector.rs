@@ -11,19 +11,14 @@ impl Reflector {
         }
     }
 
-    pub fn encrypt(&self, char_in: char) -> Result<char, &'static str> {
+    pub fn encrypt(&self, char_in: char) -> Option<char> {
         const ALPHABET: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        match ALPHABET.chars().position(|c| c == char_in) {
-            Some(index) => match self.wiring.chars().nth(index) {
-                Some(c) => Ok(c),
-                None => Err("Character not found in wiring."),
-            },
-            None => Err("Character not found in alphabet."),
-        }
+        ALPHABET.chars().position(|c| c == char_in)
+            .and_then(|index| self.wiring.chars().nth(index))
     }
 }
 
-pub mod Reflectors {
+pub mod reflectors {
     use super::Reflector;
 
     pub fn ukw_b() -> Reflector {

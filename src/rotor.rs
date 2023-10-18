@@ -23,48 +23,51 @@ impl Rotor {
         Self::ALPHABET.chars().position(|x| x == c)
     }
 
-    pub fn turn(&self) -> Rotor {
-        Rotor::new(&self.letter_roll, self.next_letter(self.position), self.notch, &self.model, self.ring)
-    }
-
     fn next_letter(&self, c: char) -> char {
         match c {
             'Z' => 'A',
-            _ => ((c as u8 + 1) as char),
+            _ => (c as u8 + 1) as char,
         }
     }
 
+    fn offset_position(&self, pos: usize) -> usize {
+        (pos + Self::position_of(self.position).unwrap() + Self::position_of(self.ring).unwrap()) % Self::ALPHABET.len()
+    }
+
+    pub fn turn(&mut self) -> bool {
+        let current_pos = self.letter_roll.chars().position(|x| x == self.position).unwrap();
+        let next_pos = (current_pos + 1) % self.letter_roll.len();
+        self.position = self.letter_roll.chars().nth(next_pos).unwrap();
+        self.position == self.notch
+    }
+
     pub fn pass_through_forward(&self, c: char) -> Option<char> {
-        let shifted_pos = Self::position_of(c).and_then(|pos_c|
-            Self::position_of(self.position).map(|pos_p| pos_c + pos_p)
-        )?;
-        self.letter_roll.chars().nth(shifted_pos % Self::ALPHABET.len())
+        let input_pos = Self::position_of(c).unwrap();
+        let offset_input_pos = self.offset_position(input_pos);
+
+        self.letter_roll.chars().nth(offset_input_pos)
     }
 
     pub fn pass_through_reverse(&self, c: char) -> Option<char> {
-        let letter_pos = Self::position_of(c).and_then(|pos_c|
-            Self::position_of(self.position).map(|pos_p| pos_c - pos_p + Self::ALPHABET.len())
-        )?;
+        let letter_pos = self.letter_roll.chars().position(|x| x == c).unwrap();
+        let offset_letter_pos = (letter_pos + Self::ALPHABET.len() - Self::position_of(self.position).unwrap() - Self::position_of(self.ring).unwrap()) % Self::ALPHABET.len();
 
-        let original_letter = self.letter_roll.chars().nth(letter_pos % Self::ALPHABET.len())?;
-        self.letter_roll.chars().position(|x| x == original_letter).and_then(|pos|
-            Self::ALPHABET.chars().nth(pos)
-        )
+        Self::ALPHABET.chars().nth(offset_letter_pos)
     }
 }
 
-pub mod Rotors {
+pub mod rotors {
     use super::Rotor;
 
-    pub fn rotor_i(p: char) -> Rotor {
+    pub fn type_i(p: char) -> Rotor {
         Rotor::new("EKMFLGDQVZNTOWYHXUSPAIBRCJ", p, 'R', "type I", 'A')
     }
 
-    pub fn rotor_ii(p: char) -> Rotor {
+    pub fn type_ii(p: char) -> Rotor {
         Rotor::new("AJDKSIRUXBLHWTMCQGZNPYFVOE", p, 'F', "type II", 'A')
     }
 
-    pub fn rotor_iii(p: char) -> Rotor {
+    pub fn type_iii(p: char) -> Rotor {
         Rotor::new("BDFHJLCPRTXVZNYEIWGAKMUSQO", p, 'W', "type III", 'A')
     }
 
