@@ -28,4 +28,4 @@ fi
 
 echo "Installation complete! You should now be able to use the enigma_cli command system-wide."
 echo "Example usage:"
-echo "    enigma_cli --input my_message.txt"
+echo "    enigma --input my_message.txt"
