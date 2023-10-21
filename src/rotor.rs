@@ -1,3 +1,22 @@
+/// Represents a rotor in the Enigma machine.
+///
+/// Rotors are the primary cryptographic component of the Enigma machine. Each rotor has a set
+/// wiring pattern (represented by `letter_roll`) that dictates how an input character is transformed.
+/// As characters are encrypted, the rotor rotates, changing the current position (`position`) and thus the
+/// transformation it applies.
+///
+/// The `notch` indicates at which position the rotor will cause the next rotor to its left to turn.
+/// The `ring` is a static setting that affects the rotor's behavior but doesn't move during encryption.
+/// Different rotor models (`model`) have different wiring patterns and notch positions.
+///
+/// # Example
+///
+/// ```rust
+/// use enigma_shark::rotors;
+///
+/// let rotor = rotors::type_i('A', 'A');
+/// let encrypted_char = rotor.pass_through_forward('A').unwrap();
+/// ```
 pub struct Rotor {
     letter_roll: String,
     position: char,
@@ -21,13 +40,6 @@ impl Rotor {
 
     fn position_of(c: char) -> Option<usize> {
         Self::ALPHABET.chars().position(|x| x == c)
-    }
-
-    fn next_letter(&self, c: char) -> char {
-        match c {
-            'Z' => 'A',
-            _ => (c as u8 + 1) as char,
-        }
     }
 
     fn offset_position(&self, pos: usize) -> usize {
@@ -59,23 +71,27 @@ impl Rotor {
 pub mod rotors {
     use super::Rotor;
 
-    pub fn type_i(p: char) -> Rotor {
-        Rotor::new("EKMFLGDQVZNTOWYHXUSPAIBRCJ", p, 'R', "type I", 'A')
+    /**
+    For example, type_i maps E->A, K->B etc ...
+    **/
+
+    pub fn type_i(p: char, r: char) -> Rotor {
+        Rotor::new("EKMFLGDQVZNTOWYHXUSPAIBRCJ", p, 'R', "type I", r)
     }
 
-    pub fn type_ii(p: char) -> Rotor {
-        Rotor::new("AJDKSIRUXBLHWTMCQGZNPYFVOE", p, 'F', "type II", 'A')
+    pub fn type_ii(p: char, r: char) -> Rotor {
+        Rotor::new("AJDKSIRUXBLHWTMCQGZNPYFVOE", p, 'F', "type II", r)
     }
 
-    pub fn type_iii(p: char) -> Rotor {
-        Rotor::new("BDFHJLCPRTXVZNYEIWGAKMUSQO", p, 'W', "type III", 'A')
+    pub fn type_iii(p: char, r: char) -> Rotor {
+        Rotor::new("BDFHJLCPRTXVZNYEIWGAKMUSQO", p, 'W', "type III", r)
     }
 
-    pub fn type_iv(p: char) -> Rotor {
-        Rotor::new("ESOVPZJAYQUIRHXLNFTGKDCMWB", p, 'K', "type IV", 'A')
+    pub fn type_iv(p: char, r: char) -> Rotor {
+        Rotor::new("ESOVPZJAYQUIRHXLNFTGKDCMWB", p, 'K', "type IV", r)
     }
 
-    pub fn type_v(p: char) -> Rotor {
-        Rotor::new("VZBRGITYUPSDNHLXAWMJQOFECK", p, 'A', "type V", 'A')
+    pub fn type_v(p: char, r: char) -> Rotor {
+        Rotor::new("VZBRGITYUPSDNHLXAWMJQOFECK", p, 'A', "type V", r)
     }
 }
