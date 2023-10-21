@@ -1,6 +1,6 @@
 use crate::plugboard::Plugboard;
-use crate::reflector::{Reflector, reflectors};
-use crate::rotor::{Rotor, rotors};
+use crate::reflector::{reflectors, Reflector};
+use crate::rotor::{rotors, Rotor};
 
 pub struct EnigmaMachine {
     rotors: Vec<Rotor>,
@@ -21,15 +21,20 @@ impl EnigmaMachine {
         (input.is_ascii_alphabetic() && input.is_uppercase())
             .then(|| input)
             .and_then(|char_to_encrypt| {
-                self.rotors.iter_mut().fold(Some(char_to_encrypt), |current_char, rotor| {
-                    current_char.and_then(|ch| rotor.pass_through_forward(ch))
-                })
+                self.rotors
+                    .iter_mut()
+                    .fold(Some(char_to_encrypt), |current_char, rotor| {
+                        current_char.and_then(|ch| rotor.pass_through_forward(ch))
+                    })
             })
             .and_then(|char_after_rotors| self.reflector.encrypt(char_after_rotors))
             .and_then(|mid_char| {
-                self.rotors.iter_mut().rev().fold(Some(mid_char), |current_char, rotor| {
-                    current_char.and_then(|ch| rotor.pass_through_reverse(ch))
-                })
+                self.rotors
+                    .iter_mut()
+                    .rev()
+                    .fold(Some(mid_char), |current_char, rotor| {
+                        current_char.and_then(|ch| rotor.pass_through_reverse(ch))
+                    })
             })
             .map(|after_rotors_reverse| self.plugboard.pass_through(after_rotors_reverse))
     }
@@ -86,26 +91,34 @@ impl EnigmaMachine {
     ///         let rotor3 = rotors::type_iii('C', 'A');
     ///
     ///         let reflector = reflectors::ukw_b();
-    ///         let plugboard = Plugboard::new(vec![])?;
+    ///         let plugboard = match Plugboard::new(vec![]) {
+    ///             Ok(plugboard) => plugboard,
+    ///             Err(e) => {
+    ///                 eprintln!("Error setting up the plugboard: {}", e);
+    ///                 Plugboard::new(vec![]).unwrap()
+    ///             }
+    ///         };
     ///
     ///         EnigmaMachine::new(vec![rotor1, rotor2, rotor3], reflector, plugboard)
     ///     }
     /// let mut enigma = setup_enigma_machine();
-    /// let result = enigma.encrypt_message("HELLO");
+    /// let result = enigma.encrypt_message("BLETCHLEY");
     /// assert!(result.is_ok());
     /// ```
     pub fn encrypt_message(&mut self, message: &str) -> Result<String, String> {
-        message.chars()
+        message
+            .chars()
             .map(|ch| {
                 self.advance_rotors();
-                self.encrypt(ch).ok_or_else(|| format!("Failed to encrypt character: '{}'", ch))
+                self.encrypt(ch)
+                    .ok_or_else(|| format!("Failed to encrypt character: '{}'", ch))
             })
             .collect()
     }
 }
 
 #[cfg(test)]
-mod tests {
+mod machine_tests {
     use super::*;
 
     fn setup_enigma_machine() -> EnigmaMachine {
@@ -132,12 +145,14 @@ mod tests {
         let message = "BANBURISMUS";
 
         let mut enigma = setup_enigma_machine();
-        let encrypted_msg = enigma.encrypt_message(message)
+        let encrypted_msg = enigma
+            .encrypt_message(message)
             .expect("Failed to encrypt message");
 
         // Resets machine to the original starting state used to encrypt
         let mut enigma_reset = setup_enigma_machine();
-        let decrypted_msg = enigma_reset.encrypt_message(&encrypted_msg)
+        let decrypted_msg = enigma_reset
+            .encrypt_message(&encrypted_msg)
             .expect("Failed to decrypt message");
 
         assert_eq!(message, decrypted_msg);

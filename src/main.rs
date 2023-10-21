@@ -1,8 +1,8 @@
 use clap::Parser;
-use std::fs;
-use std::io::Read;
+use enigma_shark::{reflectors, rotors, EnigmaMachine, Plugboard};
 use serde::Deserialize;
-use crate::{EnigmaMachine, Plugboard, reflectors, rotors};
+use std::fs;
+use std::io::{Cursor, Read};
 
 #[derive(Deserialize, Debug)]
 struct RotorConfig {
@@ -26,9 +26,9 @@ struct MachineConfig {
 
 #[derive(Parser, Debug)]
 struct Args {
-    /// Input message or file for encryption
+    /// Optional: Input message or file for encryption
     #[arg(short, long)]
-    input: String,
+    input: Option<String>,
 
     /// Optional: Configuration file for machine settings
     #[arg(short, long)]
@@ -46,51 +46,74 @@ fn main() {
                 Ok(machine) => machine,
                 Err(err) => panic!("Failed to set up the enigma machine: {}", err),
             }
-        },
+        }
         None => match setup_enigma_from_config(None) {
             Ok(machine) => machine,
             Err(err) => panic!("Failed to set up the enigma machine: {}", err),
         },
     };
 
-    let mut reader: Box<dyn Read> = match (atty::is(atty::Stream::Stdin), &args.input) {
-        (true, input) if input.is_empty() => {
-            eprintln!("Error: Please provide input through stdin or use the '-i' option.");
+    let mut reader: Box<dyn Read> = match args.input {
+        Some(input_str) if atty::is(atty::Stream::Stdin) => {
+            Box::new(Cursor::new(input_str.into_bytes()))
+        }
+        None if !atty::is(atty::Stream::Stdin) => Box::new(std::io::stdin()),
+        _ => {
+            eprintln!("Error: Please provide input through stdin or use the '--input' option.");
             std::process::exit(1);
-        },
-        (false, _) => Box::new(std::io::stdin()),
-        (_, input) => Box::new(fs::File::open(input).expect("Failed to open input file")),
+        }
     };
 
     let mut buffer = [0; 4096];
     while let Ok(len) = reader.read(&mut buffer) {
-        if len == 0 { break; }
+        if len == 0 {
+            break;
+        }
         let input_chunk = String::from_utf8_lossy(&buffer[..len]);
-        print!("{}", encrypt_with_enigma(input_chunk.to_string(), &mut enigma_machine));
+        println!(
+            "{}",
+            encrypt_with_enigma(input_chunk.to_string(), &mut enigma_machine)
+        );
     }
 }
 
 fn setup_enigma_from_config(machine_config: Option<String>) -> Result<EnigmaMachine, String> {
     if let Some(config) = machine_config {
-        let machine_settings: MachineConfig = serde_json::from_str(&config)
-            .expect("Failed to parse machine configuration");
+        let machine_settings: MachineConfig =
+            serde_json::from_str(&config).expect("Failed to parse machine configuration");
 
         let mut rotor_list = Vec::new();
 
         for rotor_config in machine_settings.rotors {
             match rotor_config.type_.as_str() {
-                "type_i" => rotor_list.push(rotors::type_i(rotor_config.position, rotor_config.ring_setting)),
-                "type_ii" => rotor_list.push(rotors::type_ii(rotor_config.position, rotor_config.ring_setting)),
-                "type_iii" => rotor_list.push(rotors::type_iii(rotor_config.position, rotor_config.ring_setting)),
-                "type_iv" => rotor_list.push(rotors::type_iv(rotor_config.position, rotor_config.ring_setting)),
-                "type_v" => rotor_list.push(rotors::type_v(rotor_config.position, rotor_config.ring_setting)),
+                "type_i" => rotor_list.push(rotors::type_i(
+                    rotor_config.position,
+                    rotor_config.ring_setting,
+                )),
+                "type_ii" => rotor_list.push(rotors::type_ii(
+                    rotor_config.position,
+                    rotor_config.ring_setting,
+                )),
+                "type_iii" => rotor_list.push(rotors::type_iii(
+                    rotor_config.position,
+                    rotor_config.ring_setting,
+                )),
+                "type_iv" => rotor_list.push(rotors::type_iv(
+                    rotor_config.position,
+                    rotor_config.ring_setting,
+                )),
+                "type_v" => rotor_list.push(rotors::type_v(
+                    rotor_config.position,
+                    rotor_config.ring_setting,
+                )),
                 _ => panic!("Unsupported rotor type!"),
             }
         }
 
         let reflector = reflectors::from_name(&machine_settings.reflector);
 
-        let plugboard_mappings: Vec<(char, char)> = machine_settings.plugboard
+        let plugboard_mappings: Vec<(char, char)> = machine_settings
+            .plugboard
             .iter()
             .map(|mapping| (mapping.from, mapping.to))
             .collect();
@@ -113,24 +136,32 @@ fn setup_enigma_from_config(machine_config: Option<String>) -> Result<EnigmaMach
             Err(err) => return Err(err.to_string()),
         };
 
-        Ok(EnigmaMachine::new(vec![rotor1, rotor2, rotor3, rotor4], reflector, plugboard))
+        Ok(EnigmaMachine::new(
+            vec![rotor1, rotor2, rotor3, rotor4],
+            reflector,
+            plugboard,
+        ))
     }
 }
 
 fn encrypt_with_enigma(input: String, enigma: &mut EnigmaMachine) -> String {
-    match enigma.encrypt_message(&input) {
+    let processed_input = input.trim().to_uppercase();
+    match enigma.encrypt_message(&processed_input) {
         Ok(encrypted_msg) => encrypted_msg,
-        Err(err) => panic!("Encryption failed with error: {}", err),
+        Err(err) => {
+            eprintln!("Encryption failed with error: {}", err);
+            std::process::exit(1);
+        }
     }
 }
 
 #[cfg(test)]
-mod tests {
+mod main_tests {
     use super::*;
 
     #[test]
     fn test_encrypt_with_default_config() {
-        let input = "HELLO".to_string();
+        let input = "BLETCHLEY".to_string();
         let mut machine = match setup_enigma_from_config(None) {
             Ok(machine) => machine,
             Err(err) => panic!("Failed to set up the enigma machine for test: {}", err),
@@ -151,9 +182,10 @@ mod tests {
             "reflector": "ukw_b",
             "plugboard": [{"from": "A", "to": "B"}]
         }
-        "#.to_string();
+        "#
+        .to_string();
 
-        let input = "HELLO".to_string();
+        let input = "BLETCHLEY".to_string();
         let mut machine = match setup_enigma_from_config(Some(config)) {
             Ok(machine) => machine,
             Err(err) => panic!("Failed to set up the enigma machine for test: {}", err),
@@ -171,7 +203,8 @@ mod tests {
             "reflector": "ukw_b",
             "plugboard": []
         }
-        "#.to_string();
+        "#
+        .to_string();
         setup_enigma_from_config(Some(config)).unwrap();
     }
 }

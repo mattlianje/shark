@@ -43,11 +43,16 @@ impl Rotor {
     }
 
     fn offset_position(&self, pos: usize) -> usize {
-        (pos + Self::position_of(self.position).unwrap() + Self::position_of(self.ring).unwrap()) % Self::ALPHABET.len()
+        (pos + Self::position_of(self.position).unwrap() + Self::position_of(self.ring).unwrap())
+            % Self::ALPHABET.len()
     }
 
     pub fn turn(&mut self) -> bool {
-        let current_pos = self.letter_roll.chars().position(|x| x == self.position).unwrap();
+        let current_pos = self
+            .letter_roll
+            .chars()
+            .position(|x| x == self.position)
+            .unwrap();
         let next_pos = (current_pos + 1) % self.letter_roll.len();
         self.position = self.letter_roll.chars().nth(next_pos).unwrap();
         self.position == self.notch
@@ -62,7 +67,10 @@ impl Rotor {
 
     pub fn pass_through_reverse(&self, c: char) -> Option<char> {
         let letter_pos = self.letter_roll.chars().position(|x| x == c).unwrap();
-        let offset_letter_pos = (letter_pos + Self::ALPHABET.len() - Self::position_of(self.position).unwrap() - Self::position_of(self.ring).unwrap()) % Self::ALPHABET.len();
+        let offset_letter_pos = (letter_pos + Self::ALPHABET.len()
+            - Self::position_of(self.position).unwrap()
+            - Self::position_of(self.ring).unwrap())
+            % Self::ALPHABET.len();
 
         Self::ALPHABET.chars().nth(offset_letter_pos)
     }
@@ -93,5 +101,60 @@ pub mod rotors {
 
     pub fn type_v(p: char, r: char) -> Rotor {
         Rotor::new("VZBRGITYUPSDNHLXAWMJQOFECK", p, 'A', "type V", r)
+    }
+}
+
+#[cfg(test)]
+mod rotor_tests {
+    use super::*;
+
+    #[test]
+    fn test_position_of() {
+        assert_eq!(Rotor::position_of('A'), Some(0));
+        assert_eq!(Rotor::position_of('Z'), Some(25));
+        assert_eq!(Rotor::position_of('M'), Some(12));
+        assert_eq!(Rotor::position_of('!'), None);
+    }
+
+    #[test]
+    fn test_offset_position() {
+        let rotor = rotors::type_i('A', 'A');
+        assert_eq!(rotor.offset_position(0), 0);
+        assert_eq!(rotor.offset_position(25), 25);
+    }
+
+    #[test]
+    fn test_turn() {
+        let mut rotor = rotors::type_i('A', 'A');
+        assert_eq!(rotor.turn(), false);
+        assert_eq!(rotor.position, 'I');
+    }
+
+    #[test]
+    fn test_turn_with_notch() {
+        let mut rotor = rotors::type_i('B', 'A');
+        assert_eq!(rotor.turn(), true);
+        assert_eq!(rotor.position, 'R');
+    }
+
+    #[test]
+    fn test_pass_through_forward() {
+        let rotor = rotors::type_i('A', 'A');
+        assert_eq!(rotor.pass_through_forward('A'), Some('E'));
+        assert_eq!(rotor.pass_through_forward('B'), Some('K'));
+    }
+
+    #[test]
+    fn test_pass_through_reverse() {
+        let rotor = rotors::type_i('A', 'A');
+        assert_eq!(rotor.pass_through_reverse('E'), Some('A'));
+        assert_eq!(rotor.pass_through_reverse('K'), Some('B'));
+    }
+
+    #[test]
+    fn test_rotor_types() {
+        let rotor = rotors::type_ii('A', 'A');
+        assert_eq!(rotor.pass_through_forward('A'), Some('A'));
+        assert_eq!(rotor.pass_through_forward('B'), Some('J'));
     }
 }
