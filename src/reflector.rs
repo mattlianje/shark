@@ -36,7 +36,9 @@ impl Reflector {
 
     pub fn encrypt(&self, char_in: char) -> Option<char> {
         const ALPHABET: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        ALPHABET.chars().position(|c:char| c == char_in)
+        ALPHABET
+            .chars()
+            .position(|c: char| c == char_in)
             .and_then(|index| self.wiring.chars().nth(index))
     }
 }

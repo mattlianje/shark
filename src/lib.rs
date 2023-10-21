@@ -1,12 +1,10 @@
-mod rotor;
-mod reflector;
-mod plugboard;
 mod machine;
 mod main;
+mod plugboard;
+mod reflector;
+mod rotor;
 
 pub use machine::EnigmaMachine;
-pub use rotor::{Rotor, rotors};
-pub use reflector::{Reflector, reflectors};
 pub use plugboard::Plugboard;
-
-
+pub use reflector::{reflectors, Reflector};
+pub use rotor::{rotors, Rotor};

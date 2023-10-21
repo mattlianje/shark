@@ -43,11 +43,16 @@ impl Rotor {
     }
 
     fn offset_position(&self, pos: usize) -> usize {
-        (pos + Self::position_of(self.position).unwrap() + Self::position_of(self.ring).unwrap()) % Self::ALPHABET.len()
+        (pos + Self::position_of(self.position).unwrap() + Self::position_of(self.ring).unwrap())
+            % Self::ALPHABET.len()
     }
 
     pub fn turn(&mut self) -> bool {
-        let current_pos = self.letter_roll.chars().position(|x| x == self.position).unwrap();
+        let current_pos = self
+            .letter_roll
+            .chars()
+            .position(|x| x == self.position)
+            .unwrap();
         let next_pos = (current_pos + 1) % self.letter_roll.len();
         self.position = self.letter_roll.chars().nth(next_pos).unwrap();
         self.position == self.notch
@@ -62,7 +67,10 @@ impl Rotor {
 
     pub fn pass_through_reverse(&self, c: char) -> Option<char> {
         let letter_pos = self.letter_roll.chars().position(|x| x == c).unwrap();
-        let offset_letter_pos = (letter_pos + Self::ALPHABET.len() - Self::position_of(self.position).unwrap() - Self::position_of(self.ring).unwrap()) % Self::ALPHABET.len();
+        let offset_letter_pos = (letter_pos + Self::ALPHABET.len()
+            - Self::position_of(self.position).unwrap()
+            - Self::position_of(self.ring).unwrap())
+            % Self::ALPHABET.len();
 
         Self::ALPHABET.chars().nth(offset_letter_pos)
     }

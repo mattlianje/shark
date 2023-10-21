@@ -1,5 +1,5 @@
 [package]
-name = "enigma_shark"
+name = "enigma-shark"
 version = "0.1.0"
 edition = "2021"
 

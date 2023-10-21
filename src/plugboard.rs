@@ -33,7 +33,8 @@ impl Plugboard {
     }
 
     pub fn pass_through(&self, c: char) -> char {
-        self.plugboard_map.iter()
+        self.plugboard_map
+            .iter()
             .find(|&&(a, b)| a == c || b == c)
             .map(|&(a, b)| if a == c { b } else { a })
             .unwrap_or(c)
@@ -42,9 +43,9 @@ impl Plugboard {
 
 pub mod plugboards {
     use super::Plugboard;
-    use rand::seq::SliceRandom;
-    use rand::{Rng, thread_rng};
     use rand::prelude::ThreadRng;
+    use rand::seq::SliceRandom;
+    use rand::{thread_rng, Rng};
 
     pub fn generate_random_mappings() -> Result<Plugboard, &'static str> {
         let mut chars: Vec<char> = ('A'..='Z').collect();
@@ -53,9 +54,11 @@ pub mod plugboards {
 
         // Perhaps this should be len
         let num_mappings: usize = rng.gen_range(1..=13);
-        let plugboard_map: Vec<(char, char)> =
-            chars.chunks(2).take(num_mappings)
-            .map(|chunk| (chunk[0], chunk[1])).collect();
+        let plugboard_map: Vec<(char, char)> = chars
+            .chunks(2)
+            .take(num_mappings)
+            .map(|chunk| (chunk[0], chunk[1]))
+            .collect();
 
         Plugboard::new(plugboard_map)
     }
