@@ -65,7 +65,7 @@ pub mod plugboards {
 }
 
 #[cfg(test)]
-mod tests {
+mod plugboard_tests {
     use super::*;
 
     #[test]

@@ -103,3 +103,58 @@ pub mod rotors {
         Rotor::new("VZBRGITYUPSDNHLXAWMJQOFECK", p, 'A', "type V", r)
     }
 }
+
+#[cfg(test)]
+mod rotor_tests {
+    use super::*;
+
+    #[test]
+    fn test_position_of() {
+        assert_eq!(Rotor::position_of('A'), Some(0));
+        assert_eq!(Rotor::position_of('Z'), Some(25));
+        assert_eq!(Rotor::position_of('M'), Some(12));
+        assert_eq!(Rotor::position_of('!'), None);
+    }
+
+    #[test]
+    fn test_offset_position() {
+        let rotor = rotors::type_i('A', 'A');
+        assert_eq!(rotor.offset_position(0), 0);
+        assert_eq!(rotor.offset_position(25), 25);
+    }
+
+    #[test]
+    fn test_turn() {
+        let mut rotor = rotors::type_i('A', 'A');
+        assert_eq!(rotor.turn(), false);  // Turns from A to B
+        assert_eq!(rotor.position, 'I');
+    }
+
+    #[test]
+    fn test_turn_with_notch() {
+        let mut rotor = rotors::type_i('B', 'A');
+        assert_eq!(rotor.turn(), true);
+        assert_eq!(rotor.position, 'R');
+    }
+
+    #[test]
+    fn test_pass_through_forward() {
+        let rotor = rotors::type_i('A', 'A');
+        assert_eq!(rotor.pass_through_forward('A'), Some('E'));
+        assert_eq!(rotor.pass_through_forward('B'), Some('K'));
+    }
+
+    #[test]
+    fn test_pass_through_reverse() {
+        let rotor = rotors::type_i('A', 'A');
+        assert_eq!(rotor.pass_through_reverse('E'), Some('A'));
+        assert_eq!(rotor.pass_through_reverse('K'), Some('B'));
+    }
+
+    #[test]
+    fn test_rotor_types() {
+        let rotor = rotors::type_ii('A', 'A');
+        assert_eq!(rotor.pass_through_forward('A'), Some('A'));
+        assert_eq!(rotor.pass_through_forward('B'), Some('J'));
+    }
+}

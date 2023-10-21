@@ -102,7 +102,7 @@ impl EnigmaMachine {
     ///         EnigmaMachine::new(vec![rotor1, rotor2, rotor3], reflector, plugboard)
     ///     }
     /// let mut enigma = setup_enigma_machine();
-    /// let result = enigma.encrypt_message("HELLO");
+    /// let result = enigma.encrypt_message("BLETCHLEY");
     /// assert!(result.is_ok());
     /// ```
     pub fn encrypt_message(&mut self, message: &str) -> Result<String, String> {
@@ -118,7 +118,7 @@ impl EnigmaMachine {
 }
 
 #[cfg(test)]
-mod tests {
+mod machine_tests {
     use super::*;
 
     fn setup_enigma_machine() -> EnigmaMachine {

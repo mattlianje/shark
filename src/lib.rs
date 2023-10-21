@@ -1,5 +1,4 @@
 mod machine;
-mod main;
 mod plugboard;
 mod reflector;
 mod rotor;

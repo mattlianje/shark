@@ -1,8 +1,8 @@
-use crate::{reflectors, rotors, EnigmaMachine, Plugboard};
 use clap::Parser;
+use enigma_shark::{reflectors, rotors, EnigmaMachine, Plugboard};
 use serde::Deserialize;
 use std::fs;
-use std::io::Read;
+use std::io::{Cursor, Read};
 
 #[derive(Deserialize, Debug)]
 struct RotorConfig {
@@ -26,9 +26,9 @@ struct MachineConfig {
 
 #[derive(Parser, Debug)]
 struct Args {
-    /// Input message or file for encryption
+    /// Optional: Input message or file for encryption
     #[arg(short, long)]
-    input: String,
+    input: Option<String>,
 
     /// Optional: Configuration file for machine settings
     #[arg(short, long)]
@@ -53,13 +53,15 @@ fn main() {
         },
     };
 
-    let mut reader: Box<dyn Read> = match (atty::is(atty::Stream::Stdin), &args.input) {
-        (true, input) if input.is_empty() => {
-            eprintln!("Error: Please provide input through stdin or use the '-i' option.");
+    let mut reader: Box<dyn Read> = match args.input {
+        Some(input_str) if atty::is(atty::Stream::Stdin) => {
+            Box::new(Cursor::new(input_str.into_bytes()))
+        }
+        None if !atty::is(atty::Stream::Stdin) => Box::new(std::io::stdin()),
+        _ => {
+            eprintln!("Error: Please provide input through stdin or use the '--input' option.");
             std::process::exit(1);
         }
-        (false, _) => Box::new(std::io::stdin()),
-        (_, input) => Box::new(fs::File::open(input).expect("Failed to open input file")),
     };
 
     let mut buffer = [0; 4096];
@@ -68,7 +70,7 @@ fn main() {
             break;
         }
         let input_chunk = String::from_utf8_lossy(&buffer[..len]);
-        print!(
+        println!(
             "{}",
             encrypt_with_enigma(input_chunk.to_string(), &mut enigma_machine)
         );
@@ -143,19 +145,23 @@ fn setup_enigma_from_config(machine_config: Option<String>) -> Result<EnigmaMach
 }
 
 fn encrypt_with_enigma(input: String, enigma: &mut EnigmaMachine) -> String {
-    match enigma.encrypt_message(&input) {
+    let processed_input = input.trim().to_uppercase();
+    match enigma.encrypt_message(&processed_input) {
         Ok(encrypted_msg) => encrypted_msg,
-        Err(err) => panic!("Encryption failed with error: {}", err),
+        Err(err) => {
+            eprintln!("Encryption failed with error: {}", err);
+            std::process::exit(1);
+        }
     }
 }
 
 #[cfg(test)]
-mod tests {
+mod main_tests {
     use super::*;
 
     #[test]
     fn test_encrypt_with_default_config() {
-        let input = "HELLO".to_string();
+        let input = "BLETCHLEY".to_string();
         let mut machine = match setup_enigma_from_config(None) {
             Ok(machine) => machine,
             Err(err) => panic!("Failed to set up the enigma machine for test: {}", err),
@@ -179,7 +185,7 @@ mod tests {
         "#
         .to_string();
 
-        let input = "HELLO".to_string();
+        let input = "BLETCHLEY".to_string();
         let mut machine = match setup_enigma_from_config(Some(config)) {
             Ok(machine) => machine,
             Err(err) => panic!("Failed to set up the enigma machine for test: {}", err),
