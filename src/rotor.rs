@@ -126,7 +126,7 @@ mod rotor_tests {
     #[test]
     fn test_turn() {
         let mut rotor = rotors::type_i('A', 'A');
-        assert_eq!(rotor.turn(), false);  // Turns from A to B
+        assert_eq!(rotor.turn(), false);
         assert_eq!(rotor.position, 'I');
     }
 
