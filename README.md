@@ -6,7 +6,7 @@ stymieing Bletchley Park's efforts to decipher Atlantic U-boat communications fo
 ## Installation
 System wide:
 ```bash
-$ curl -sSL https://github.com/mattlianje/shark/blob/main/install.sh | bash
+$ curl -sSL https://raw.githubusercontent.com/mattlianje/shark/main/install.sh | bash
 
 # Checks system wide install was successful 
 $ enigma --help
