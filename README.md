@@ -1,10 +1,9 @@
-# shark
+# Shark
 
 A CLI Enigma tool named after the "Shark" Blackout of 1942, when the Kriegsmarine added a fourth rotor to their Enigma machines 
 stymieing Bletchley Park's efforts to decipher Atlantic U-boat communications for nearly 10 months.
 
-| ![shark on unix](img/bp-readme.gif) | ![four rotor Enigma](img/4-rotor-enigma.jpeg) |
-|:---:|:---:|
+![shark on unix](img/bp-readme.gif)
 
 ## Installation
 System wide:
