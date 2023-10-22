@@ -3,6 +3,8 @@ name = "enigma_shark"
 version = "0.1.0"
 authors = ["Matthieu Court <matthieu.court@protonmail.com>"]
 edition = "2021"
+description = "UNIX friendly CLI Enigma"
+license = "GPL-3.0"
 
 [dependencies]
 rand = "0.8"
