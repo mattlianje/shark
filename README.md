@@ -7,7 +7,7 @@ stymieing Bletchley Park's efforts to decipher Atlantic U-boat communications fo
 |:---:|:---:|
 
 ## Installation
-![Cargo](https://crates.io/crates/enigma_shark):
+[Cargo](https://crates.io/crates/enigma_shark):
 ```bash
 $ cargo install enigma_shark
 ```
