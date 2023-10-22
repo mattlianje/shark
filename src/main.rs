@@ -144,7 +144,7 @@ fn setup_enigma_from_config(machine_config: Option<String>) -> Result<EnigmaMach
     }
 }
 
-fn encrypt_with_enigma(input: String, enigma: &mut EnigmaMachine) -> String {
+pub fn encrypt_with_enigma(input: String, enigma: &mut EnigmaMachine) -> String {
     let processed_input = input.trim().to_uppercase();
     match enigma.encrypt_message(&processed_input) {
         Ok(encrypted_msg) => encrypted_msg,
@@ -157,6 +157,7 @@ fn encrypt_with_enigma(input: String, enigma: &mut EnigmaMachine) -> String {
 
 #[cfg(test)]
 mod main_tests {
+    use std::time::Instant;
     use super::*;
 
     #[test]
@@ -206,5 +207,33 @@ mod main_tests {
         "#
         .to_string();
         setup_enigma_from_config(Some(config)).unwrap();
+    }
+
+    #[test]
+    fn benchmark_encrypt_5mb() {
+        // Generate a 5MB string input
+        let input: String = std::iter::repeat("A").take(5 * 1024).collect();
+
+        let mut machine = match setup_enigma_from_config(None) {
+            Ok(machine) => machine,
+            Err(err) => panic!("Failed to set up the enigma machine for test: {}", err),
+        };
+
+        let mut cursor = Cursor::new(input.into_bytes());
+        let mut buffer = [0; 4096];
+
+        let start_time = Instant::now();
+
+        while let Ok(len) = cursor.read(&mut buffer) {
+            if len == 0 {
+                break;
+            }
+            let input_chunk = String::from_utf8_lossy(&buffer[..len]);
+            let _ = encrypt_with_enigma(input_chunk.to_string(), &mut machine);
+        }
+
+        let elapsed_time = start_time.elapsed();
+
+        println!("Time taken to encrypt 5MB: {:?}", elapsed_time);
     }
 }
