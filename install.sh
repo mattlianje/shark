@@ -10,7 +10,7 @@ else
 fi
 
 echo "Fetching the enigma-shark crate..."
-cargo install enigma-shark
+cargo install enigma_shark
 
 if [[ "$SHELL" == *"zsh"* ]]; then
     SHELL_CONFIG="$HOME/.zshrc"
@@ -21,11 +21,10 @@ fi
 if [[ ":$PATH:" != *":$HOME/.cargo/bin:"* ]]; then
     echo "Adding Cargo's bin directory to PATH in $SHELL_CONFIG..."
     echo "export PATH=\$PATH:\$HOME/.cargo/bin" >> $SHELL_CONFIG
-    source $SHELL_CONFIG
 else
     echo "Cargo's bin directory is already in PATH."
 fi
 
 echo "Installation complete! You should now be able to use the enigma_cli command system-wide."
 echo "Example usage:"
-echo "    enigma --input my_message.txt"
+echo "    enigma --input HELLO "
