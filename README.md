@@ -53,7 +53,7 @@ $ cat config.json
 $ enigma --input plaintext.txt --config config.json > encrypted.txt
 ```
 ## Features/Goals
-- **UNIX Philosophy Adherence:** Shark focuses on doing one thing well: encryption.
+- **UNIX Philosophy Adherence:** Shark focuses on doing one thing well: symmetric en/decryption.
 
 ![UNIX philosophy](img/enigma-pipes-diagram.png)
 - **Blazing Speed:** Primarily built to learn about Rust, I will continue to work on lowering the memory footprint of `shark` and making use of Rust's concurrency. Shark processes data in chunks, making it suitable for large datasets and > 50x faster on 5MB inputs than [other C++](benches/bench.sh) cli enigmas [^1].
