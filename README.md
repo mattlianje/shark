@@ -3,10 +3,12 @@
   <img src="img/4-rotor-enigma.jpeg" width="300" alt="four rotor Enigma">
 </p>
 
-A CLI Enigma tool named after the "Shark" Blackout of 1942, when the Kriegsmarine added a fourth rotor to their Enigma machines 
-stymieing Bletchley Park's efforts to decipher Atlantic U-boat communications for nearly 10 months.
+A UNIX friendly CLI [Enigma](https://en.wikipedia.org/wiki/Enigma_machine) emulator.
 
 ![shark on unix](img/bp-readme.gif)
+
+`Shark` is named after the "Shark" Blackout of 1942, when the Kriegsmarine added a fourth rotor to their Enigma machines 
+stymieing Bletchley Park's efforts to decipher Atlantic U-boat communications for nearly 10 months.
 
 ## Installation
 [Cargo](https://crates.io/crates/enigma_shark):
