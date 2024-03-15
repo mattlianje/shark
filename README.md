@@ -19,11 +19,7 @@ enigma_shark = "*"
 
 System wide:
 ```bash
-curl -sSL https://raw.githubusercontent.com/mattlianje/shark/main/install.sh | bash
-```
-
-Check the installation was successful
-```
+curl -sSL https://raw.githubusercontent.com/mattlianje/shark/main/install.sh | bash;
 enigma --help
 ```
 
