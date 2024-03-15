@@ -11,25 +11,20 @@ A UNIX friendly CLI [Enigma](https://en.wikipedia.org/wiki/Enigma_machine) emula
 stymieing Bletchley Park's efforts to decipher Atlantic U-boat communications for nearly 10 months.
 
 ## Installation
-[Cargo](https://crates.io/crates/enigma_shark):
-```bash
-$ cargo install enigma_shark
+Add this to your `Cargo.toml` for [crates.io/enigma_shark](https://crates.io/crates/enigma_shark):
+```toml
+[dependencies]
+enigma_shark = "*"
 ```
+
 System wide:
 ```bash
-$ curl -sSL https://raw.githubusercontent.com/mattlianje/shark/main/install.sh | bash
-
-# Checks system wide install was successful 
-$ enigma --help
+curl -sSL https://raw.githubusercontent.com/mattlianje/shark/main/install.sh | bash
 ```
-Build source:
-```bash
-$ git clone https://github.com/mattlianje/shark.git
-$ cd shark
-$ cargo build --release
-$ echo "HELLOWORLD" | ./target/release/enigma
-# Will output
-ZWMRGTTIIZ
+
+Check the installation was successful
+```
+enigma --help
 ```
 
 ## Use
@@ -49,7 +44,6 @@ $ cat config.json
     "plugboard": [{"from": "A", "to": "B"}]
 }
 
-# Use these settings easily
 $ enigma --input plaintext.txt --config config.json > encrypted.txt
 ```
 ## Features/Goals
