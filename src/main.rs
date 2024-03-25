@@ -1,6 +1,7 @@
 use clap::Parser;
 use enigma_shark::{reflectors, rotors, EnigmaMachine, Plugboard};
 use serde::Deserialize;
+use std::collections::HashMap;
 use std::fs;
 use std::io::{Cursor, Read};
 
@@ -8,7 +9,8 @@ use std::io::{Cursor, Read};
 struct RotorConfig {
     type_: String,
     position: char,
-    ring_setting: char,
+    //ring: char,
+    ring: char,
 }
 
 #[derive(Deserialize, Debug)]
@@ -21,7 +23,8 @@ struct PlugboardMapping {
 struct MachineConfig {
     rotors: Vec<RotorConfig>,
     reflector: String,
-    plugboard: Vec<PlugboardMapping>,
+    //plugboard: Vec<PlugboardMapping>,
+    plugboard: HashMap<char, char>,
 }
 
 #[derive(Parser, Debug)]
@@ -86,26 +89,21 @@ fn setup_enigma_from_config(machine_config: Option<String>) -> Result<EnigmaMach
 
         for rotor_config in machine_settings.rotors {
             match rotor_config.type_.as_str() {
-                "type_i" => rotor_list.push(rotors::type_i(
-                    rotor_config.position,
-                    rotor_config.ring_setting,
-                )),
-                "type_ii" => rotor_list.push(rotors::type_ii(
-                    rotor_config.position,
-                    rotor_config.ring_setting,
-                )),
-                "type_iii" => rotor_list.push(rotors::type_iii(
-                    rotor_config.position,
-                    rotor_config.ring_setting,
-                )),
-                "type_iv" => rotor_list.push(rotors::type_iv(
-                    rotor_config.position,
-                    rotor_config.ring_setting,
-                )),
-                "type_v" => rotor_list.push(rotors::type_v(
-                    rotor_config.position,
-                    rotor_config.ring_setting,
-                )),
+                "type_i" | "i" => {
+                    rotor_list.push(rotors::type_i(rotor_config.position, rotor_config.ring))
+                }
+                "type_ii" | "ii" => {
+                    rotor_list.push(rotors::type_ii(rotor_config.position, rotor_config.ring))
+                }
+                "type_iii" | "iii" => {
+                    rotor_list.push(rotors::type_iii(rotor_config.position, rotor_config.ring))
+                }
+                "type_iv" | "iv" => {
+                    rotor_list.push(rotors::type_iv(rotor_config.position, rotor_config.ring))
+                }
+                "type_v" | "v" => {
+                    rotor_list.push(rotors::type_v(rotor_config.position, rotor_config.ring))
+                }
                 _ => panic!("Unsupported rotor type!"),
             }
         }
@@ -115,13 +113,11 @@ fn setup_enigma_from_config(machine_config: Option<String>) -> Result<EnigmaMach
         let plugboard_mappings: Vec<(char, char)> = machine_settings
             .plugboard
             .iter()
-            .map(|mapping| (mapping.from, mapping.to))
+            .map(|(&from, &to)| (from, to))
             .collect();
 
-        let plugboard = match Plugboard::new(plugboard_mappings) {
-            Ok(p) => p,
-            Err(err) => return Err(err.to_string()),
-        };
+        let plugboard = Plugboard::new(plugboard_mappings)
+            .expect("Failed to initialize the plugboard with provided mappings");
 
         Ok(EnigmaMachine::new(rotor_list, reflector, plugboard))
     } else {
@@ -157,8 +153,8 @@ pub fn encrypt_with_enigma(input: String, enigma: &mut EnigmaMachine) -> String 
 
 #[cfg(test)]
 mod main_tests {
-    use std::time::Instant;
     use super::*;
+    use std::time::Instant;
 
     #[test]
     fn test_encrypt_with_default_config() {
@@ -176,12 +172,12 @@ mod main_tests {
         let config = r#"
         {
             "rotors": [
-                {"type_": "type_i", "position": "A", "ring_setting": "A"},
-                {"type_": "type_ii", "position": "B", "ring_setting": "A"},
-                {"type_": "type_iii", "position": "C", "ring_setting": "A"}
+                {"type_": "type_i", "position": "A", "ring": "A"},
+                {"type_": "type_ii", "position": "B", "ring": "A"},
+                {"type_": "type_iii", "position": "C", "ring": "A"}
             ],
             "reflector": "ukw_b",
-            "plugboard": [{"from": "A", "to": "B"}]
+            "plugboard": {"A": "B"}
         }
         "#
         .to_string();
@@ -200,9 +196,9 @@ mod main_tests {
     fn test_invalid_rotor_type() {
         let config = r#"
         {
-            "rotors": [{"type_": "invalid_type", "position": "A", "ring_setting": "A"}],
+            "rotors": [{"type_": "invalid_type", "position": "A", "ring": "A"}],
             "reflector": "ukw_b",
-            "plugboard": []
+            "plugboard": {}
         }
         "#
         .to_string();

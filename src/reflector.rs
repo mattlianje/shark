@@ -1,26 +1,5 @@
 /// Represents the Reflector component of an Enigma machine.
-///
-/// In the Enigma machine's encryption process, after a character passes through all rotors,
-/// it reaches the reflector. The reflector ensures that the encryption process is
-/// reversible by redirecting the character to another position before it returns
-/// back through the rotors in the reverse order.
-///
-/// The wiring represents the character mapping of the reflector, determining the position
-/// a character is redirected to. There were different types of reflectors (UKW-B, C) ... but
-/// the only differed by their wirings and exploited the fact the 26 mod 2 = 0 to ensure each
-/// grapheme had one and only one pair.
-///
-///
-/// # Example
-///
-/// ```rust
-/// use enigma_shark::reflectors;
-///
-/// let reflector = reflectors::ukw_b();
-/// let encrypted_char = reflector.encrypt('A').unwrap();
-/// // The character will always be reflected to a different position.
-/// assert_ne!(encrypted_char, 'A');
-/// ```
+
 pub struct Reflector {
     wiring: String,
     model: String,
