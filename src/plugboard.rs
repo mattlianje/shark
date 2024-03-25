@@ -1,10 +1,5 @@
 /// Represents the Plugboard component of an Enigma machine.
-///
-/// The Plugboard is responsible for the final substitution of characters after they pass
-/// through the rotors, through the reflector, and back through the rotors. It achieves this by
-/// using a set of paired character mappings, essentially "plugging" one character into
-/// another. If a character does not have a mapping in the plugboard, it remains unchanged.
-///
+
 pub struct Plugboard {
     plugboard_map: Vec<(char, char)>,
 }
