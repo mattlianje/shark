@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="pix/zob_with_github.png" width="400" alt="shark logo">
+  <img src="pix/shark_with_github.png" width="400" alt="shark logo">
 </p>
 
 # Shark
